@@ -353,17 +353,28 @@ def show(context, **kwargs):
         echo()
 
 
-@tests.command()
+@tests.command('lint')
 @click.pass_context
 @name_filter_condition
 @click.option(
     '-f', '--fix', is_flag=True,
     help='Attempt to fix all discovered issues.')
 @verbose_debug_quiet
-def lint(context, **kwargs):
-    tmt.Test._save_context(context)
-    exit_code = lint_test(context)
-    raise SystemExit(exit_code)
+def lint_test(context, **kwargs):
+    """
+    Check tests against the L1 metadata specification.
+
+    Regular expression can be used to filter tests for linting.
+    Use '.' to select tests under the current working directory.
+    """
+    # tmt.Test._save_context(context)
+    exit_code = 0
+    for test in context.obj.tree.tests():
+        if not test.lint():
+            exit_code = 1
+        echo()
+    #raise SystemExit(exit_code)
+    return exit_code
 
 
 _test_templates = listed(tmt.templates.TEST, join='or')
@@ -569,13 +580,25 @@ def show(context, **kwargs):
         echo()
 
 
-@plans.command()
+@plans.command('lint')
 @click.pass_context
 @name_filter_condition
 @verbose_debug_quiet
-def lint(context, **kwargs):
+def lint_plan(context, **kwargs):
+    """
+    Check plans against the L2 metadata specification.
+
+    Regular expression can be used to filter plans by name.
+    Use '.' to select plans under the current working directory.
+    """
     tmt.Plan._save_context(context)
-    lint_plan()
+    exit_code = 0
+    for plan in context.obj.tree.plans():
+        if not plan.lint():
+            exit_code = 1
+        echo()
+    #raise SystemExit(exit_code)
+    return exit_code
 
 
 _plan_templates = listed(tmt.templates.PLAN, join='or')
@@ -792,14 +815,25 @@ def export(
             echo(story.export(format_))
 
 
-@stories.command()
+@stories.command('lint')
 @click.pass_context
 @name_filter_condition
 @verbose_debug_quiet
-def lint(context, **kwargs):
+def lint_stories(context, **kwargs):
+    """
+    Check stories against the L3 metadata specification.
+
+    Regular expression can be used to filter stories by name.
+    Use '.' to select stories under the current working directory.
+    """
     tmt.Story._save_context(context)
-    exit_code = lint_story(context)
-    raise SystemExit(exit_code)
+    exit_code = 0
+    for story in context.obj.tree.stories():
+        if not story.lint():
+            exit_code = 1
+        echo()
+    #raise SystemExit(exit_code)
+    return exit_code
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1012,69 +1046,17 @@ def images(context, **kwargs):
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-def lint_test(context, **kwargs):
-    """
-    Check tests against the L1 metadata specification.
-
-    Regular expression can be used to filter tests for linting.
-    Use '.' to select tests under the current working directory.
-    """
-    # tmt.Test._save_context(context)
-    exit_code = 0
-    for test in context.obj.tree.tests():
-        if not test.lint():
-            exit_code = 1
-        echo()
-    #raise SystemExit(exit_code)
-    return exit_code
-
-
-def lint_story(context, **kwargs):
-    """
-    Check stories against the L3 metadata specification.
-
-    Regular expression can be used to filter stories by name.
-    Use '.' to select stories under the current working directory.
-    """
-    tmt.Story._save_context(context)
-    exit_code = 0
-    for story in context.obj.tree.stories():
-        if not story.lint():
-            exit_code = 1
-        echo()
-    #raise SystemExit(exit_code)
-    return exit_code
-
-
-def lint_plan(context, **kwargs):
-    """
-    Check plans against the L2 metadata specification.
-
-    Regular expression can be used to filter plans by name.
-    Use '.' to select plans under the current working directory.
-    """
-    tmt.Plan._save_context(context)
-    exit_code = 0
-    for plan in context.obj.tree.plans():
-        if not plan.lint():
-            exit_code = 1
-        echo()
-    #raise SystemExit(exit_code)
-    return exit_code
-
-
 @main.command()
 @click.pass_context
+@click.option(
+    '-f', '--fix', is_flag=True,
+    help='Attempt to fix all discovered issues.')
 @verbose_debug_quiet
 def lint(context, **kwargs):
-    print(f"Linting test...")
-    tmt.Test._save_context(context)
-    SystemExit(lint_test(context))
-
-    print(f"Linting stories...")
-    tmt.Story._save_context(context)
-    SystemExit(lint_story(context))
-
-    print(f"Linting plans...")
-    tmt.Story._save_context(context)
-    SystemExit(lint_story(context))
+    exit_code = 0
+    for command in (lint_test, lint_plan, lint_stories):
+        try:
+            context.forward(command)
+        except SystemExit as e:
+            exit_code |= e.code
+    raise SystemExit(exit_code)
