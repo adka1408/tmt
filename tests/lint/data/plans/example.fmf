@@ -1,0 +1,9 @@
+summary:
+discovery:
+    how: fmf
+    url: https://github.com/psss/tmt
+prepare:
+    how: ansible
+    playbook: plans/packages.yml
+execute:
+    how: tmt

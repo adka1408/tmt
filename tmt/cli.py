@@ -367,14 +367,13 @@ def lint_test(context, **kwargs):
     Regular expression can be used to filter tests for linting.
     Use '.' to select tests under the current working directory.
     """
-    # tmt.Test._save_context(context)
+    tmt.Test._save_context(context)
     exit_code = 0
     for test in context.obj.tree.tests():
         if not test.lint():
             exit_code = 1
         echo()
-    #raise SystemExit(exit_code)
-    return exit_code
+    raise SystemExit(exit_code)
 
 
 _test_templates = listed(tmt.templates.TEST, join='or')
@@ -597,8 +596,7 @@ def lint_plan(context, **kwargs):
         if not plan.lint():
             exit_code = 1
         echo()
-    #raise SystemExit(exit_code)
-    return exit_code
+    raise SystemExit(exit_code)
 
 
 _plan_templates = listed(tmt.templates.PLAN, join='or')
@@ -832,8 +830,7 @@ def lint_stories(context, **kwargs):
         if not story.lint():
             exit_code = 1
         echo()
-    #raise SystemExit(exit_code)
-    return exit_code
+    raise SystemExit(exit_code)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
