@@ -1,6 +1,7 @@
 
 """ Test Metadata Utilities """
 
+import datetime
 import fcntl
 import io
 import os
@@ -264,7 +265,8 @@ class Common(object):
 
     def debug(self, key, value=None, color=None, shift=1, level=1, err=False):
         """ Show message if in requested debug mode level """
-        self._log(self._indent(key, value, color=None, shift=shift))
+        self._log(datetime.datetime.utcnow().strftime('%H:%M:%S') + ' ' +
+                  self._indent(key, value, color=None, shift=shift))
         if self.opt('debug') >= level:
             echo(self._indent(key, value, color, shift), err=err)
 
