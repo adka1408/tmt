@@ -70,6 +70,10 @@ def force_dry(function):
     return function
 
 
+def fix(function):
+    return tmt.options.fix(function)
+
+
 def name_filter_condition(function):
     """ Common filter options (short & long) """
     options = [
@@ -356,9 +360,7 @@ def show(context, **kwargs):
 @tests.command('lint')
 @click.pass_context
 @name_filter_condition
-@click.option(
-    '-f', '--fix', is_flag=True,
-    help='Attempt to fix all discovered issues.')
+@fix
 @verbose_debug_quiet
 def lint_test(context, **kwargs):
     """
@@ -1045,9 +1047,7 @@ def images(context, **kwargs):
 
 @main.command()
 @click.pass_context
-@click.option(
-    '-f', '--fix', is_flag=True,
-    help='Attempt to fix all discovered issues.')
+@fix
 @verbose_debug_quiet
 def lint(context, **kwargs):
     exit_code = 0
